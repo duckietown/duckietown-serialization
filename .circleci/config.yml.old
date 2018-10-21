@@ -1,0 +1,19 @@
+version: 2
+jobs:
+    build:
+     docker:
+        - image: circleci/python:3
+          environment:
+
+     steps:
+        - checkout
+        - run:
+            name: Install deps
+            command: |
+                pip install --user --upgrade -r requirements.txt
+                python setup.py develop --no-deps
+
+        - run:
+            name: Run tests
+            command: |
+              make tests
