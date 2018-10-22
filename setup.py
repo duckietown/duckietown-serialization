@@ -19,7 +19,7 @@ def get_version(filename):
 
 shell_version = get_version(filename='src/duckietown_serialization/__init__.py')
 
-setup(name='duckietown-serialization',
+setup(name='duckietown-serialization-ds1',
 
       version=shell_version,
       download_url='http://github.com/duckietown/duckietown-serialization/tarball/%s' % shell_version,
