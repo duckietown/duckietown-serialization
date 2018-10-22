@@ -17,7 +17,7 @@ def get_version(filename):
     return version
 
 
-shell_version = get_version(filename='src/duckietown_serialization/__init__.py')
+shell_version = get_version(filename='src/duckietown_serialization_ds1/__init__.py')
 
 setup(name='duckietown-serialization-ds1',
 
@@ -44,7 +44,7 @@ setup(name='duckietown-serialization-ds1',
 
       entry_points={
           'console_scripts': [
-              # 'dts = dt_shell:cli_main',
+              'dt-ds1-parse-json = duckietown_serialization_ds1:cli_parse_json',
           ]
       }
       )

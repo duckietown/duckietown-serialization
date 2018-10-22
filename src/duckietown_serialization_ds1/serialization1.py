@@ -7,6 +7,7 @@ from copy import deepcopy
 
 import numpy as np
 
+from duckietown_serialization_ds1 import logger
 from .exceptions import CouldNotDeserialize
 
 __all__ = ['Serializable']
@@ -59,7 +60,8 @@ class Serializable0(object):
                 f = {}
             else:
                 f = d[kk]
-            f = k.params_from_json_dict(f)
+            if hasattr(k, 'params_from_json_dict'):
+                f = k.params_from_json_dict(f)
             # print(cls, k, f)
             params.update(f)
         return params
@@ -72,7 +74,7 @@ from future.utils import with_metaclass
 
 def register_class(cls):
     Serializable0.registered[cls.__name__] = cls
-    print('registering %s' % cls.__name__)
+    logger.debug('Registering class %s' % cls.__name__)
 
 
 class MetaSerializable(ABCMeta):
@@ -83,6 +85,8 @@ class MetaSerializable(ABCMeta):
 
 
 class Serializable(with_metaclass(MetaSerializable, Serializable0)):
+# class Serializable(Serializable0):
+    __metaclass__ = MetaSerializable
 
     @classmethod
     def from_json_dict(cls, d):
@@ -103,21 +107,25 @@ def as_json_dict(x):
         return None
     elif isinstance(x, (int, str, float)):
         return x
-    elif isinstance(x, list):
+    elif isinstance(x, (list, tuple)):
         return [as_json_dict(_) for _ in x]
     elif isinstance(x, dict):
         return dict([(k, as_json_dict(v)) for k, v in x.items()])
-    elif isinstance(x, Serializable0):  # Serializable fails in Python 3 for metaclass stuff
+    elif hasattr(x, 'as_json_dict'):  # Serializable fails in Python 3 for metaclass stuff
         return x.as_json_dict()
     elif isinstance(x, np.ndarray):
         return x.tolist()
     else:
         msg = 'Invalid class %s' % type(x).__name__
+        msg += '\nmro: %s' % type(x).mro()
         msg += '\nCannot serialize {}'.format(x)
         raise ValueError(msg)
 
 
 def from_json_dict2(d):
+    if six.PY2:
+        if isinstance(d, unicode):
+            return d
     if d is None:
         return None
     elif isinstance(d, (int, str, float)):
@@ -129,7 +137,10 @@ def from_json_dict2(d):
             return from_json_dict2_object(d)
         else:
             return dict([(k, from_json_dict2(v)) for k, v in d.items()])
-
+    else:
+        msg = 'Invalid class %s' % type(d).__name__
+        msg += '\nCannot serialize {}'.format(d)
+        raise ValueError(msg)
 
 def looks_like_object(d):
     cd = {}
@@ -205,6 +216,8 @@ def from_json_dict2_object(d):
 
 
 def is_encoded_classname(x):
+    if not isinstance(x, six.string_types):
+        return False, None
     if x.startswith(GLYPH):
         return True, x.replace(GLYPH, '')
     else:
