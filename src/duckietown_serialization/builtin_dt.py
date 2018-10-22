@@ -11,7 +11,9 @@ class GenericData(Serializable):
 
     def params_to_json_dict(self):
         res = {}
-        res['base58'] = base58.b58encode(self.bytes_contents)
+        encoded_bytes = base58.b58encode(self.bytes_contents)
+        encoded_string = encoded_bytes.decode()
+        res['base58'] = encoded_string
         res['content-type'] = self.content_type
         return res
 

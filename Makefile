@@ -50,3 +50,18 @@ branch=$(shell git rev-parse --abbrev-ref HEAD)
 #
 #test:
 #	make -C testing
+
+
+
+name=dt-ser-python3
+
+test-python3:
+	docker stop $(name) || true
+	docker rm $(name) || true
+
+	docker run -it -v "$(shell realpath $(PWD)):/dt-ser" -w /dt-ser --name $(name) python:3 /bin/bash
+
+test-python3-install:
+	pip install -r requirements.txt
+	pip install nose
+	python setup.py develop --no-deps

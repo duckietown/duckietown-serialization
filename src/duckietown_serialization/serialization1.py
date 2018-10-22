@@ -23,7 +23,7 @@ class Serializable0(object):
             s = ",".join('%s=%s' % (k, v) for k, v in params.items())
             return '%s(%s)' % (type(self).__name__, s)
         else:
-            return '%s()' % (type(self).__name__)
+            return '%s()' % type(self).__name__
 
     def as_json_dict(self):
         mro = type(self).mro()
@@ -101,12 +101,13 @@ def as_json_dict(x):
         return [as_json_dict(_) for _ in x]
     elif isinstance(x, dict):
         return dict([(k, as_json_dict(v)) for k, v in x.items()])
-    elif isinstance(x, Serializable):
+    elif isinstance(x, Serializable0): # Serializable fails in Python 3 for metaclass stuff
         return x.as_json_dict()
     elif isinstance(x, np.ndarray):
         return x.tolist()
     else:
         msg = 'Invalid class %s' % type(x).__name__
+        msg += '\nCannot serialize {}'.format(x)
         raise ValueError(msg)
 
 
@@ -175,7 +176,7 @@ def from_json_dict2_object(d):
     d2 = deepcopy(cd)
     try:
         res = klass.params_from_json_dict_(d2)
-    except BaseException as e:
+    except BaseException:
         msg = 'Cannot interpret data using %s' % klass.__name__
         msg += '\n\n%s' % json.dumps(d, indent=4)[:100]
         msg += '\n\n%s' % traceback.format_exc()
