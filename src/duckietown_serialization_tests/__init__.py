@@ -1,5 +1,5 @@
 # coding=utf-8
-from .serialize1 import *
+from .ser1 import *
 
 
 def jobs_comptests(context):

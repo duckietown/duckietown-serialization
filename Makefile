@@ -21,7 +21,7 @@ tests-clean:
 	rm -rf out-comptests
 
 tests:
-	comptests --nonose duckietown_world_tests
+	comptests --nonose duckietown_serialization_tests
 
 
 branch=$(shell git rev-parse --abbrev-ref HEAD)
