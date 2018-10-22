@@ -1,3 +1,4 @@
+# coding=utf-8
 import base58
 
 from .serialization1 import Serializable
