@@ -18,13 +18,12 @@ jobs:
           name: Install deps
           command: |
             pip install --user --upgrade -r requirements.txt
-            PATH=~/.local/bin:$PATH python setup.py develop --prefix ~/.local --no-deps
+            python setup.py develop --prefix ~/.local --no-deps
 
       - run:
           name: Run tests
           command: |
-
-            make tests
+            PATH=~/.local/bin:$PATH  make tests
 
   test-3.5:
     <<: *test-template
