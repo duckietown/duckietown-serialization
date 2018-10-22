@@ -4,8 +4,8 @@ import json
 import oyaml as yaml
 from comptests import comptest, run_module_tests
 
-from duckietown_serialization import Serializable
-from duckietown_serialization.builtin_dt import GenericData
+from duckietown_serialization_ds1 import Serializable
+from duckietown_serialization_ds1 import GenericData
 
 
 class MyClass(Serializable):

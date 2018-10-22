@@ -1,3 +1,4 @@
+[![CircleCI](https://circleci.com/gh/duckietown/duckietown-serialization.svg?style=shield)](https://circleci.com/gh/duckietown/duckietown-serialization)
 
 
 # Duckietown Serialization
