@@ -92,7 +92,13 @@ class Serializable(with_metaclass(MetaSerializable, Serializable0)):
         return vars(self)
 
 
+import six
+
+
 def as_json_dict(x):
+    if six.PY2:
+        if isinstance(x, unicode):
+            return x
     if x is None:
         return None
     elif isinstance(x, (int, str, float)):
@@ -101,7 +107,7 @@ def as_json_dict(x):
         return [as_json_dict(_) for _ in x]
     elif isinstance(x, dict):
         return dict([(k, as_json_dict(v)) for k, v in x.items()])
-    elif isinstance(x, Serializable0): # Serializable fails in Python 3 for metaclass stuff
+    elif isinstance(x, Serializable0):  # Serializable fails in Python 3 for metaclass stuff
         return x.as_json_dict()
     elif isinstance(x, np.ndarray):
         return x.tolist()
