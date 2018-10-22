@@ -16,7 +16,6 @@ class GenericData(Serializable):
 
     @classmethod
     def params_from_json_dict(cls, d):
-        print d
         base58s = d.pop('base58')
         bytes_contents = base58.b58decode(base58s)
         content_type = d.pop('content-type')
