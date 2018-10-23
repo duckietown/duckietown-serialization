@@ -37,7 +37,6 @@ class Serializable0(object):
                 params = k.params_to_json_dict(self)
                 if params is not None:
                     params = as_json_dict(params)
-
                     res[GLYPH + k.__name__] = params
         return res
 
@@ -79,7 +78,7 @@ def register_class(cls):
 
 class MetaSerializable(ABCMeta):
     def __new__(mcs, name, bases, class_dict):
-        cls = type.__new__(mcs, name, bases, class_dict)
+        cls = ABCMeta.__new__(mcs, name, bases, class_dict)
         register_class(cls)
         return cls
 
