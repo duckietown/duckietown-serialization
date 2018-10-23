@@ -1,6 +1,7 @@
 # coding=utf-8
 import base64
 import base58
+import six
 
 from .serialization1 import Serializable
 
@@ -9,6 +10,8 @@ class GenericData(Serializable):
     prefer_base58 = False
 
     def __init__(self, bytes_contents, content_type):
+        if six.PY3:
+            assert isinstance(bytes_contents, bytes), type(bytes_contents)
         self.bytes_contents = bytes_contents
         self.content_type = content_type
 

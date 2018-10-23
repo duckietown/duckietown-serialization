@@ -111,7 +111,7 @@ def ser3():
 
 @comptest
 def ser4():
-    ob = GenericData('ijdeijdiej', 'image/jpg')
+    ob = GenericData(b'ijdeijdiej', 'image/jpg')
     ob2 = try_serialization(ob)
 
 
