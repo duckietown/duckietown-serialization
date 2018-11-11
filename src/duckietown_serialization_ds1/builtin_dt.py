@@ -5,6 +5,10 @@ import six
 
 from .serialization1 import Serializable
 
+__all__ = [
+    'GenericData',
+]
+
 
 class GenericData(Serializable):
     prefer_base58 = False

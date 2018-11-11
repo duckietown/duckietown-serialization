@@ -1,5 +1,6 @@
 # coding=utf-8
 from __future__ import unicode_literals
+
 import json
 import traceback
 from abc import ABCMeta
@@ -7,11 +8,14 @@ from collections import OrderedDict
 from copy import deepcopy
 
 import numpy as np
+from contracts import check_isinstance
 
 from duckietown_serialization_ds1 import logger
 from .exceptions import CouldNotDeserialize
 
-__all__ = ['Serializable']
+__all__ = [
+    'Serializable',
+]
 
 GLYPH = '~'
 
@@ -43,7 +47,16 @@ class Serializable0(object):
 
     @classmethod
     def params_from_json_dict(cls, d):
-        return from_json_dict2(d)
+        if d is None:
+            return {}
+
+        d2 = {}
+        for k, v in d.items():
+            d2[k] = d.pop(k)
+        r = from_json_dict2(d2)
+
+        check_isinstance(r, dict)
+        return r
 
     @classmethod
     def params_from_json_dict_(cls, d):
@@ -61,7 +74,16 @@ class Serializable0(object):
             else:
                 f = d[kk]
             if hasattr(k, 'params_from_json_dict'):
-                f = k.params_from_json_dict(f)
+                f0 = deepcopy(f)
+                f = k.params_from_json_dict(f0)
+
+                if not isinstance(f, dict):
+                    msg = 'Class %s returned not a dict with params_from_json_dict: %s ' % (k.__name__, f)
+                    raise ValueError(msg)
+                if f0:
+                    msg = 'Error by %s:params_from_json_dict' % k.__name__
+                    msg += '\nKeys not interpreted/popped: %s' % list(f0)
+                    raise ValueError(msg)
             # print(cls, k, f)
             params.update(f)
         return params
@@ -74,7 +96,7 @@ from future.utils import with_metaclass
 
 def register_class(cls):
     Serializable0.registered[cls.__name__] = cls
-    logger.debug('Registering class %s' % cls.__name__)
+    # logger.debug('Registering class %s' % cls.__name__)
 
 
 class MetaSerializable(ABCMeta):
@@ -85,8 +107,6 @@ class MetaSerializable(ABCMeta):
 
 
 class Serializable(with_metaclass(MetaSerializable, Serializable0)):
-# class Serializable(Serializable0):
-    __metaclass__ = MetaSerializable
 
     @classmethod
     def from_json_dict(cls, d):
@@ -142,6 +162,7 @@ def from_json_dict2(d):
         msg += '\nCannot serialize {}'.format(d)
         raise ValueError(msg)
 
+
 def looks_like_object(d):
     cd = {}
     for k in d:
@@ -195,7 +216,7 @@ def from_json_dict2_object(d):
         res = klass.params_from_json_dict_(d2)
     except BaseException:
         msg = 'Cannot interpret data using %s' % klass.__name__
-        msg += '\n\n%s' % json.dumps(d, indent=4)[:100]
+        msg += '\n\n%s' % json.dumps(d, indent=4)[:300]
         msg += '\n\n%s' % traceback.format_exc()
         raise CouldNotDeserialize(msg)
 

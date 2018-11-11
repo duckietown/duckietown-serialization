@@ -2,6 +2,6 @@ PyYAML
 oyaml
 
 
-comptests==1.4.26
+comptests==1.4.27
 base58
 
