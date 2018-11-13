@@ -8,30 +8,23 @@ from collections import OrderedDict
 from copy import deepcopy
 
 import numpy as np
-from contracts import check_isinstance
+import six
+from contracts import check_isinstance, contract
+from future.utils import with_metaclass
 
-from duckietown_serialization_ds1 import logger
 from .exceptions import CouldNotDeserialize
 
 __all__ = [
     'Serializable',
 ]
 
-GLYPH = '~'
-
 
 class Serializable0(object):
     __metaclass__ = ABCMeta
 
-    def __repr__(self):
-        params = self.params_to_json_dict()
-        if params:
-            s = ",".join('%s=%s' % (k, v) for k, v in params.items())
-            return '%s(%s)' % (type(self).__name__, s)
-        else:
-            return '%s()' % type(self).__name__
+    GLYPH_CLASSES = '~'
 
-    def as_json_dict(self):
+    def as_json_dict(self, context):
         mro = type(self).mro()
         res = {}
         for k in mro:
@@ -39,27 +32,31 @@ class Serializable0(object):
                 continue
             # noinspection PyUnresolvedReferences
             if hasattr(k, 'params_to_json_dict'):
-                params = k.params_to_json_dict(self)
+                try:
+                    params = k.params_to_json_dict(self, context)
+                except TypeError as e:
+                    msg = 'Cannot call %s:params_to_json_dict(): %s' % (k.__name__, e)
+                    raise TypeError(msg)
                 if params is not None:
-                    params = as_json_dict(params)
-                    res[GLYPH + k.__name__] = params
+                    params = as_json_dict(params, context)
+                    res[Serializable0.GLYPH_CLASSES + k.__name__] = params
         return res
 
     @classmethod
-    def params_from_json_dict(cls, d):
+    def params_from_json_dict(cls, d, context):
         if d is None:
             return {}
 
         d2 = {}
         for k, v in d.items():
             d2[k] = d.pop(k)
-        r = from_json_dict2(d2)
+        r = from_json_dict2(d2, context)
 
         check_isinstance(r, dict)
         return r
 
     @classmethod
-    def params_from_json_dict_(cls, d):
+    def params_from_json_dict_(cls, d, context):
         if not isinstance(d, dict):
             msg = 'Expected d to be a dict, got %s' % type(d).__name__
             raise ValueError(msg)
@@ -75,7 +72,11 @@ class Serializable0(object):
                 f = d[kk]
             if hasattr(k, 'params_from_json_dict'):
                 f0 = deepcopy(f)
-                f = k.params_from_json_dict(f0)
+                try:
+                    f = k.params_from_json_dict(f0, context)
+                except TypeError as e:
+                    msg = 'Cannot invoke params_from_json_dict() on %s: %s' % (k.__name__, e)
+                    raise TypeError(msg)
 
                 if not isinstance(f, dict):
                     msg = 'Class %s returned not a dict with params_from_json_dict: %s ' % (k.__name__, f)
@@ -89,9 +90,6 @@ class Serializable0(object):
         return params
 
     registered = OrderedDict()
-
-
-from future.utils import with_metaclass
 
 
 def register_class(cls):
@@ -109,17 +107,24 @@ class MetaSerializable(ABCMeta):
 class Serializable(with_metaclass(MetaSerializable, Serializable0)):
 
     @classmethod
-    def from_json_dict(cls, d):
-        return from_json_dict2(d)
+    def from_json_dict(cls, d, context):
+        return from_json_dict2(d, context)
 
-    def params_to_json_dict(self):
+    def params_to_json_dict(self, context):
         return vars(self)
 
+    def __repr__(self):
+        from duckietown_serialization_ds1 import Context
+        context = Context()
+        params = self.params_to_json_dict(context)
+        if params:
+            s = ",".join('%s=%s' % (k, v) for k, v in params.items())
+            return '%s(%s)' % (type(self).__name__, s)
+        else:
+            return '%s()' % type(self).__name__
 
-import six
 
-
-def as_json_dict(x):
+def as_json_dict(x, context):
     if six.PY2:
         if isinstance(x, unicode):
             return x
@@ -128,11 +133,11 @@ def as_json_dict(x):
     elif isinstance(x, (int, str, float)):
         return x
     elif isinstance(x, (list, tuple)):
-        return [as_json_dict(_) for _ in x]
+        return [as_json_dict(_, context) for _ in x]
     elif isinstance(x, dict):
-        return dict([(k, as_json_dict(v)) for k, v in x.items()])
+        return dict([(k, as_json_dict(v, context)) for k, v in x.items()])
     elif hasattr(x, 'as_json_dict'):  # Serializable fails in Python 3 for metaclass stuff
-        return x.as_json_dict()
+        return x.as_json_dict(context=context)
     elif isinstance(x, np.ndarray):
         return x.tolist()
     else:
@@ -142,7 +147,7 @@ def as_json_dict(x):
         raise ValueError(msg)
 
 
-def from_json_dict2(d):
+def from_json_dict2(d, context):
     if six.PY2:
         if isinstance(d, unicode):
             return d
@@ -151,25 +156,49 @@ def from_json_dict2(d):
     elif isinstance(d, (int, str, float)):
         return d
     elif isinstance(d, list):
-        return [from_json_dict2(_) for _ in d]
+        return [from_json_dict2(_, context) for _ in d]
     elif isinstance(d, dict):
         if looks_like_object(d):
-            return from_json_dict2_object(d)
+            return from_json_dict2_object(d, context)
         else:
-            return dict([(k, from_json_dict2(v)) for k, v in d.items()])
+            return dict([(k, from_json_dict2(v, context)) for k, v in d.items()])
     else:
         msg = 'Invalid class %s' % type(d).__name__
         msg += '\nCannot serialize {}'.format(d)
         raise ValueError(msg)
 
 
-def looks_like_object(d):
+@contract(object_wire_presentation='dict')
+def looks_like_object(object_wire_presentation):
     cd = {}
-    for k in d:
+    for k in object_wire_presentation:
         it_is, name = is_encoded_classname(k)
         if it_is:
-            cd[name] = d[k]
+            cd[name] = object_wire_presentation[k]
     return len(cd) > 0
+
+
+def get_classes_for_object(object_wire_presentation):
+    """
+        Returns all the classes declared and inferred from a wire presentation of an object.
+
+    :param object_wire_presentation:
+    :return:
+    """
+    res = set()
+    for k in object_wire_presentation:
+        it_is, name = is_encoded_classname(k)
+        if name in Serializable.registered:
+            klass = Serializable.registered[name]
+            res.add(name)
+            for base in klass.mro():
+                if base.__name__ in Serializable.registered:
+                    res.add(base.__name__)
+
+        else:
+            raise NotImplementedError()
+
+    return res
 
 
 add_fake = True
@@ -185,7 +214,7 @@ def create_fake_class(cname):
     Serializable.registered[cname] = FakeClass
 
 
-def from_json_dict2_object(d):
+def from_json_dict2_object(d, context):
     if not isinstance(d, dict):
         msg = 'Expected dict for %s' % d
         raise CouldNotDeserialize(msg)
@@ -213,7 +242,7 @@ def from_json_dict2_object(d):
 
     d2 = deepcopy(cd)
     try:
-        res = klass.params_from_json_dict_(d2)
+        res = klass.params_from_json_dict_(d2, context)
     except BaseException:
         msg = 'Cannot interpret data using %s' % klass.__name__
         msg += '\n\n%s' % json.dumps(d, indent=4)[:300]
@@ -231,15 +260,14 @@ def from_json_dict2_object(d):
         raise CouldNotDeserialize(msg)
 
     return out
-    #
-    # msg = 'Cannot interpret any of %s' % list(d)
-    # raise CouldNotDeserialize(msg)
 
 
 def is_encoded_classname(x):
     if not isinstance(x, six.string_types):
         return False, None
-    if x.startswith(GLYPH):
-        return True, x.replace(GLYPH, '')
+    glyph = Serializable0.GLYPH_CLASSES
+
+    if x.startswith(glyph):
+        return True, x.replace(glyph, '')
     else:
         return False, None

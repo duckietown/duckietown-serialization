@@ -22,7 +22,7 @@ class GenericData(Serializable):
     def __repr__(self):
         return 'GenericData(%s, len %s)' % (self.content_type, len(self.bytes_contents))
 
-    def params_to_json_dict(self):
+    def params_to_json_dict(self, context):
         res = {}
         if GenericData.prefer_base58:
             encoded_bytes = base58.b58encode(self.bytes_contents)
@@ -36,7 +36,7 @@ class GenericData(Serializable):
         return res
 
     @classmethod
-    def params_from_json_dict(cls, d):
+    def params_from_json_dict(cls, d, context):
         if 'base64' in d:
             base64s = d.pop('base64')
 

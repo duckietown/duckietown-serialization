@@ -1,7 +1,7 @@
 # coding=utf-8
 from __future__ import unicode_literals
 
-__version__ = '1.0.4'
+__version__ = '2.0.0'
 
 import logging
 
@@ -13,3 +13,4 @@ from .exceptions import *
 from .serialization1 import *
 from .builtin_dt import *
 from .cli1 import *
+from .context import *

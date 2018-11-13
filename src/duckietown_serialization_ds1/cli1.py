@@ -1,16 +1,18 @@
 from __future__ import unicode_literals
+
 import json
 import sys
 
-from duckietown_serialization_ds1 import Serializable
+from .context import Context
+from .serialization1 import Serializable
 
 
 def cli_parse_json():
     i = sys.stdin
-
+    context = Context.default()
     for line in i.readlines():
         j = json.loads(line)
-        ob = Serializable.from_json_dict(j)
+        ob = Serializable.from_json_dict(j, context)
         # print(ob)
         d = ob.as_json_dict()
         j2 = json.dumps(d)
