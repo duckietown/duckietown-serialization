@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import json
+import logging
 import traceback
 from abc import ABCMeta
 from collections import OrderedDict
@@ -10,7 +11,7 @@ from copy import deepcopy
 import numpy as np
 from contracts import check_isinstance
 
-from duckietown_serialization_ds1 import logger
+
 from .exceptions import CouldNotDeserialize
 
 __all__ = [
@@ -51,7 +52,7 @@ class Serializable0(object):
             return {}
 
         d2 = {}
-        for k, v in d.items():
+        for k, v in list(d.items()):
             d2[k] = d.pop(k)
         r = from_json_dict2(d2)
 
