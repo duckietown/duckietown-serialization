@@ -2,16 +2,14 @@
 from __future__ import unicode_literals
 
 import json
-import logging
 import traceback
 from abc import ABCMeta
 from collections import OrderedDict
 from copy import deepcopy
 
 import numpy as np
+
 from contracts import check_isinstance
-
-
 from .exceptions import CouldNotDeserialize
 
 __all__ = [
@@ -21,8 +19,17 @@ __all__ = [
 GLYPH = '~'
 
 
-class Serializable0(object):
-    __metaclass__ = ABCMeta
+
+
+class MetaSerializable(ABCMeta):
+    def __new__(mcs, name, bases, class_dict):
+        cls = ABCMeta.__new__(mcs, name, bases, class_dict)
+        register_class(cls)
+        return cls
+
+class Serializable0(metaclass=ABCMeta):
+
+
 
     def __repr__(self):
         params = self.params_to_json_dict()
@@ -91,24 +98,6 @@ class Serializable0(object):
 
     registered = OrderedDict()
 
-
-from future.utils import with_metaclass
-
-
-def register_class(cls):
-    Serializable0.registered[cls.__name__] = cls
-    # logger.debug('Registering class %s' % cls.__name__)
-
-
-class MetaSerializable(ABCMeta):
-    def __new__(mcs, name, bases, class_dict):
-        cls = ABCMeta.__new__(mcs, name, bases, class_dict)
-        register_class(cls)
-        return cls
-
-
-class Serializable(with_metaclass(MetaSerializable, Serializable0)):
-
     @classmethod
     def from_json_dict(cls, d):
         return from_json_dict2(d)
@@ -117,36 +106,42 @@ class Serializable(with_metaclass(MetaSerializable, Serializable0)):
         return vars(self)
 
 
-import six
+def register_class(cls):
+    Serializable0.registered[cls.__name__] = cls
+    # logger.debug('Registering class %s' % cls.__name__)
+
+
+# Serializable = Serializable0
+class Serializable(Serializable0, metaclass=MetaSerializable):
+    pass
+
 
 
 def as_json_dict(x):
-    if six.PY2:
-        if isinstance(x, unicode):
+    try:
+        if x is None:
+            return None
+        elif isinstance(x, (int, str, float)):
             return x
-    if x is None:
-        return None
-    elif isinstance(x, (int, str, float)):
-        return x
-    elif isinstance(x, (list, tuple)):
-        return [as_json_dict(_) for _ in x]
-    elif isinstance(x, dict):
-        return dict([(k, as_json_dict(v)) for k, v in x.items()])
-    elif hasattr(x, 'as_json_dict'):  # Serializable fails in Python 3 for metaclass stuff
-        return x.as_json_dict()
-    elif isinstance(x, np.ndarray):
-        return x.tolist()
-    else:
-        msg = 'Invalid class %s' % type(x).__name__
-        msg += '\nmro: %s' % type(x).mro()
-        msg += '\nCannot serialize {}'.format(x)
-        raise ValueError(msg)
+        elif isinstance(x, (list, tuple)):
+            return [as_json_dict(_) for _ in x]
+        elif isinstance(x, dict):
+            return dict([(k, as_json_dict(v)) for k, v in x.items()])
+        elif hasattr(x, 'as_json_dict'):  # Serializable fails in Python 3 for metaclass stuff
+            return x.as_json_dict()
+        elif isinstance(x, np.ndarray):
+            return x.tolist()
+        else:
+            msg = 'Invalid class %s' % type(x).__name__
+            msg += '\nmro: %s' % type(x).mro()
+            msg += '\nCannot serialize {}'.format(x)
+            raise ValueError(msg)
+    except BaseException as e:
+        msg = 'Could not run as_json_dict for type %s\n %s\n.....' % (type(x), str(x)[:200])
+        raise TypeError(msg) from e
 
 
 def from_json_dict2(d):
-    if six.PY2:
-        if isinstance(d, unicode):
-            return d
     if d is None:
         return None
     elif isinstance(d, (int, str, float)):
@@ -238,7 +233,7 @@ def from_json_dict2_object(d):
 
 
 def is_encoded_classname(x):
-    if not isinstance(x, six.string_types):
+    if not isinstance(x, str):
         return False, None
     if x.startswith(GLYPH):
         return True, x.replace(GLYPH, '')
