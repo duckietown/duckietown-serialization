@@ -9,7 +9,7 @@ from copy import deepcopy
 
 import numpy as np
 
-from contracts import check_isinstance
+from zuper_commons.types import check_isinstance
 from .exceptions import CouldNotDeserialize
 
 __all__ = [
