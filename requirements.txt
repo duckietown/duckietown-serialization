@@ -3,6 +3,6 @@ oyaml
 
 
 comptests==1.4.34
-base58
+base58<2.0,>=1.0.2
 
 zuper-commons
