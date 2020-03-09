@@ -28,7 +28,7 @@ setup(name='duckietown-serialization-ds1',
       install_requires=[
           'PyYAML',
           'oyaml',
-          'base58',
+          'base58<2',
       ],
 
       tests_require=[
