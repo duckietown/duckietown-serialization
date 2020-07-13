@@ -32,7 +32,7 @@ setup(name='duckietown-serialization-ds1',
       ],
 
       tests_require=[
-          'comptests',
+          'comptests-z6',
       ],
 
       # This avoids creating the egg file, which is a zip file, which makes our data
