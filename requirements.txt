@@ -2,7 +2,7 @@ PyYAML
 oyaml
 
 
-comptests-z6==1.4.34
+comptests-z6
 base58<2.0,>=1.0.2
 
 
