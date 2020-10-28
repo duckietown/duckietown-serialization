@@ -1,8 +1,7 @@
 FROM docker:18-dind
 
-WORKDIR /duckietown-shell
+WORKDIR /project
 
-COPY requirements.* ./
 
 RUN apk --update --no-cache add \
 	python2 \
@@ -12,9 +11,15 @@ RUN apk --update --no-cache add \
 	git \
 	gcc \
 	musl-dev \
-	linux-headers \
-    && pip install -r requirements.resolved \
-    && apk del python2-dev gcc musl-dev linux-headers
+	linux-headers && apk del python2-dev gcc musl-dev linux-headers
+
+RUN pip3 install -U pip>=20.2
+COPY requirements.* ./
+RUN cat requirements.* > .requirements.txt
+RUN  pip3 install --use-feature=2020-resolver -r .requirements.txt
+
+
+
 
 # copy the rest
 COPY . .
