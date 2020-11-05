@@ -14,6 +14,7 @@ from .exceptions import CouldNotDeserialize
 
 __all__ = [
     'Serializable',
+    'as_json_dict',
 ]
 
 GLYPH = '~'
