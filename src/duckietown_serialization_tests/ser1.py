@@ -61,7 +61,7 @@ def ser2():
     ob2 = Serializable.from_json_dict(d2_yaml)
     print(ob2)
 
-    ob2.y.x
+    _=ob2.y.x
 
     ob2_json = json.dumps(ob2.as_json_dict(), indent=4)
     print(ob2_json)

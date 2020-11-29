@@ -48,6 +48,7 @@ class Serializable0(metaclass=ABCMeta):
                 continue
             # noinspection PyUnresolvedReferences
             if hasattr(k, 'params_to_json_dict'):
+                # noinspection PyCallingNonCallable
                 params = k.params_to_json_dict(self)
                 if params is not None:
                     params = as_json_dict(params)
@@ -84,6 +85,7 @@ class Serializable0(metaclass=ABCMeta):
                 f = d[kk]
             if hasattr(k, 'params_from_json_dict'):
                 f0 = deepcopy(f)
+                # noinspection PyCallingNonCallable
                 f = k.params_from_json_dict(f0)
 
                 if not isinstance(f, dict):
@@ -129,6 +131,7 @@ def as_json_dict(x):
         elif isinstance(x, dict):
             return dict([(k, as_json_dict(v)) for k, v in x.items()])
         elif hasattr(x, 'as_json_dict'):  # Serializable fails in Python 3 for metaclass stuff
+            # noinspection PyCallingNonCallable
             return x.as_json_dict()
         elif isinstance(x, np.ndarray):
             return x.tolist()
