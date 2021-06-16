@@ -13,13 +13,11 @@ from zuper_commons.types import check_isinstance
 from .exceptions import CouldNotDeserialize
 
 __all__ = [
-    'Serializable',
-    'as_json_dict',
+    "Serializable",
+    "as_json_dict",
 ]
 
-GLYPH = '~'
-
-
+GLYPH = "~"
 
 
 class MetaSerializable(ABCMeta):
@@ -28,17 +26,15 @@ class MetaSerializable(ABCMeta):
         register_class(cls)
         return cls
 
+
 class Serializable0(metaclass=ABCMeta):
-
-
-
     def __repr__(self):
         params = self.params_to_json_dict()
         if params:
-            s = ",".join('%s=%s' % (k, v) for k, v in params.items())
-            return '%s(%s)' % (type(self).__name__, s)
+            s = ",".join("%s=%s" % (k, v) for k, v in params.items())
+            return "%s(%s)" % (type(self).__name__, s)
         else:
-            return '%s()' % type(self).__name__
+            return "%s()" % type(self).__name__
 
     def as_json_dict(self):
         mro = type(self).mro()
@@ -47,7 +43,7 @@ class Serializable0(metaclass=ABCMeta):
             if k is object or k is Serializable0 or k is Serializable:
                 continue
             # noinspection PyUnresolvedReferences
-            if hasattr(k, 'params_to_json_dict'):
+            if hasattr(k, "params_to_json_dict"):
                 # noinspection PyCallingNonCallable
                 params = k.params_to_json_dict(self)
                 if params is not None:
@@ -71,7 +67,7 @@ class Serializable0(metaclass=ABCMeta):
     @classmethod
     def params_from_json_dict_(cls, d):
         if not isinstance(d, dict):
-            msg = 'Expected d to be a dict, got %s' % type(d).__name__
+            msg = "Expected d to be a dict, got %s" % type(d).__name__
             raise ValueError(msg)
         params = {}
         mro = cls.mro()
@@ -83,17 +79,17 @@ class Serializable0(metaclass=ABCMeta):
                 f = {}
             else:
                 f = d[kk]
-            if hasattr(k, 'params_from_json_dict'):
+            if hasattr(k, "params_from_json_dict"):
                 f0 = deepcopy(f)
                 # noinspection PyCallingNonCallable
                 f = k.params_from_json_dict(f0)
 
                 if not isinstance(f, dict):
-                    msg = 'Class %s returned not a dict with params_from_json_dict: %s ' % (k.__name__, f)
+                    msg = "Class %s returned not a dict with params_from_json_dict: %s " % (k.__name__, f)
                     raise ValueError(msg)
                 if f0:
-                    msg = 'Error by %s:params_from_json_dict' % k.__name__
-                    msg += '\nKeys not interpreted/popped: %s' % list(f0)
+                    msg = "Error by %s:params_from_json_dict" % k.__name__
+                    msg += "\nKeys not interpreted/popped: %s" % list(f0)
                     raise ValueError(msg)
             # print(cls, k, f)
             params.update(f)
@@ -119,7 +115,6 @@ class Serializable(Serializable0, metaclass=MetaSerializable):
     pass
 
 
-
 def as_json_dict(x):
     try:
         if x is None:
@@ -130,18 +125,18 @@ def as_json_dict(x):
             return [as_json_dict(_) for _ in x]
         elif isinstance(x, dict):
             return dict([(k, as_json_dict(v)) for k, v in x.items()])
-        elif hasattr(x, 'as_json_dict'):  # Serializable fails in Python 3 for metaclass stuff
+        elif hasattr(x, "as_json_dict"):  # Serializable fails in Python 3 for metaclass stuff
             # noinspection PyCallingNonCallable
             return x.as_json_dict()
         elif isinstance(x, np.ndarray):
             return x.tolist()
         else:
-            msg = 'Invalid class %s' % type(x).__name__
-            msg += '\nmro: %s' % type(x).mro()
-            msg += '\nCannot serialize {}'.format(x)
+            msg = "Invalid class %s" % type(x).__name__
+            msg += "\nmro: %s" % type(x).mro()
+            msg += "\nCannot serialize {}".format(x)
             raise ValueError(msg)
     except BaseException as e:
-        msg = 'Could not run as_json_dict for type %s\n %s\n.....' % (type(x), str(x)[:200])
+        msg = "Could not run as_json_dict for type %s\n %s\n....." % (type(x), str(x)[:200])
         raise TypeError(msg) from e
 
 
@@ -158,8 +153,8 @@ def from_json_dict2(d):
         else:
             return dict([(k, from_json_dict2(v)) for k, v in d.items()])
     else:
-        msg = 'Invalid class %s' % type(d).__name__
-        msg += '\nCannot serialize {}'.format(d)
+        msg = "Invalid class %s" % type(d).__name__
+        msg += "\nCannot serialize {}".format(d)
         raise ValueError(msg)
 
 
@@ -187,7 +182,7 @@ def create_fake_class(cname):
 
 def from_json_dict2_object(d):
     if not isinstance(d, dict):
-        msg = 'Expected dict for %s' % d
+        msg = "Expected dict for %s" % d
         raise CouldNotDeserialize(msg)
 
     # find out how many classes declarations there are
@@ -203,7 +198,7 @@ def from_json_dict2_object(d):
             if add_fake:
                 create_fake_class(cname)
             else:
-                msg = 'Class %s not registered' % cname
+                msg = "Class %s not registered" % cname
                 raise CouldNotDeserialize(msg)
 
     ordered = sorted(cd, key=lambda x: list(Serializable.registered).index(x), reverse=True)
@@ -215,19 +210,19 @@ def from_json_dict2_object(d):
     try:
         res = klass.params_from_json_dict_(d2)
     except BaseException:
-        msg = 'Cannot interpret data using %s' % klass.__name__
-        msg += '\n\n%s' % json.dumps(d, indent=4)[:300]
-        msg += '\n\n%s' % traceback.format_exc()
+        msg = "Cannot interpret data using %s" % klass.__name__
+        msg += "\n\n%s" % json.dumps(d, indent=4)[:300]
+        msg += "\n\n%s" % traceback.format_exc()
         raise CouldNotDeserialize(msg)
 
     try:
         out = klass(**res)
     except BaseException:
-        msg = 'Cannot deserialize.'
-        msg += '\ncd: %s' % cd
-        msg += '\nklass: %s' % klass
-        msg += '\nparams: %s' % res
-        msg += '\n\n' + traceback.format_exc()
+        msg = "Cannot deserialize."
+        msg += "\ncd: %s" % cd
+        msg += "\nklass: %s" % klass
+        msg += "\nparams: %s" % res
+        msg += "\n\n" + traceback.format_exc()
         raise CouldNotDeserialize(msg)
 
     return out
@@ -240,6 +235,6 @@ def is_encoded_classname(x):
     if not isinstance(x, str):
         return False, None
     if x.startswith(GLYPH):
-        return True, x.replace(GLYPH, '')
+        return True, x.replace(GLYPH, "")
     else:
         return False, None

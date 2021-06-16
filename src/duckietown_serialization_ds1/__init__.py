@@ -1,11 +1,11 @@
 # coding=utf-8
 from __future__ import unicode_literals
 
-__version__ = '1.0.13'
+__version__ = "1.0.13"
 
 import logging
 
-logger = logging.getLogger('dt-serialization')
+logger = logging.getLogger("dt-serialization")
 logger.setLevel(logging.DEBUG)
 logging.basicConfig()
 

@@ -1,22 +1,20 @@
-
-
 # language=yaml
 config = """
 ~Component:
     # static assets are to be ready before the initialization
     assets:
-        map: 
+        map:
             ~StaticAsset:
-                description:                
+                description:
                 type: "~PlacedObject"
-                
+
     inputs:
-        query:  
+        query:
             ~InputStream:
                 description:
                 type: "~SE2Transform"
                 expect-frequency: whenever
-      
+
         timer1:
             ~Timer:
                 interval: 5s
@@ -26,53 +24,53 @@ config = """
             ~Command:
                 description: Control the robot
                 in_states: [running]
-                
+
         stop:
             ~Command:
                 description: Stops the motion
                 in_states: [running]
-    
+
     outputs:
         result:
             ~OutputStream:
                 description:
                 type: "~PlanningResult"
 
-        processed: 
+        processed:
             ~Visualization:
                 type: "~ProcessedImage"
-                
-        status: 
-            ~Visualization: 
-        
+
+        status:
+            ~Visualization:
+
     configuration:
-        param1: 
+        param1:
             ~ConfigurationParameter:
                 description:
                 default:
                 type:
-        
-    states: 
+
+    states:
         ~States:
             born:
             init:
               ~States:
-                  nominal: 
+                  nominal:
                   failed:
                     will-retry:
-                    given-up: 
+                    given-up:
             running:
                 nominal:
                     waiting:
-                    reading: 
-                    computing: 
+                    reading:
+                    computing:
                     writing:
                 failed:
             terminating:
                 nominal:
                 failed:
             done:
-             
+
     resources:
       computation:
       latency:
@@ -82,33 +80,37 @@ config = """
 interc = """
 ~Interconnection:
     components:
-        component1: {~FromConfig: a.yaml} 
-        
+        component1: {~FromConfig: a.yaml}
+
     links: |
         component1.z -> component2.z
         mine -> component1.z
-    
+
     inputs:
         map: component1.map
-        
+
     outputs:
         two: component2.data
-  
+
     commands:
         go: component1.go
-        
-    
+
+
 """
+
+
 class MessagingInterface(object):
     """
 
 
-        DSC= {"
+    DSC= {"
 
     """
+
     @classmethod
     def from_env(cls):
         pass
+
     def __init__(self):
         pass
 

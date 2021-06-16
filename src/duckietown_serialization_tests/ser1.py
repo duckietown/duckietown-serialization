@@ -17,7 +17,7 @@ class MyClass(Serializable):
 
 @comptest
 def ser1():
-    ob = MyClass(0, MyClass(1, {'a': 'b'}))
+    ob = MyClass(0, MyClass(1, {"a": "b"}))
     d = ob.as_json_dict()
     d_json = json.dumps(d, indent=4)
     print(d_json)
@@ -45,8 +45,8 @@ def ser2():
             self.x = x
             self.y = y
 
-    Serializable.registered.pop('MyClass2')
-    ob = MyClass2(0, MyClass2(1, {'a': 'b'}))
+    Serializable.registered.pop("MyClass2")
+    ob = MyClass2(0, MyClass2(1, {"a": "b"}))
     d = ob.as_json_dict()
     d_json = json.dumps(d, indent=4)
     print(d_json)
@@ -61,7 +61,7 @@ def ser2():
     ob2 = Serializable.from_json_dict(d2_yaml)
     print(ob2)
 
-    _=ob2.y.x
+    _ = ob2.y.x
 
     ob2_json = json.dumps(ob2.as_json_dict(), indent=4)
     print(ob2_json)
@@ -112,9 +112,9 @@ def ser3():
 
 @comptest
 def ser4():
-    ob = GenericData(b'ijdeijdiej', 'image/jpg')
+    ob = GenericData(b"ijdeijdiej", "image/jpg")
     ob2 = try_serialization(ob)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_module_tests()

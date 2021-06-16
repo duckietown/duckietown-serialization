@@ -42,5 +42,5 @@ def ser2a():
     d = ob.as_json_dict()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_module_tests()

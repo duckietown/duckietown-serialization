@@ -17,5 +17,5 @@ def cli_parse_json():
         print(j2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_parse_json()
