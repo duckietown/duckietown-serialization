@@ -13,10 +13,10 @@ RUN apk --update --no-cache add \
 	musl-dev \
 	linux-headers && apk del python2-dev gcc musl-dev linux-headers
 
-RUN pip3 install -U "pip>=20.2"
+RUN python3 -m pip install -U "pip>=20.2"
 COPY requirements.* ./
 RUN cat requirements.* > .requirements.txt
-RUN  pip3 install  -r .requirements.txt
+RUN python3 -m pip install  -r .requirements.txt
 
 
 
@@ -42,7 +42,7 @@ COPY . .
 
 COPY . .
 
-RUN pip install .
+RUN python3 -m pip install .
 
 ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
