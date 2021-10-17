@@ -30,6 +30,9 @@ setup(
         "PyYAML",
         "oyaml",
         "base58<2",
+        "numpy",
+        "six",
+        "zuper-commons-z6",
     ],
     tests_require=[
         "comptests-z6",
