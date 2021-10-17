@@ -1,0 +1,27 @@
+{
+  "install_requires": [
+    "PyYAML",
+    "base58<2",
+    "numpy",
+    "oyaml",
+    "six",
+    "zuper-commons-z6"
+  ],
+  "tests_require": [
+    "comptests-z6"
+  ],
+  "srcdir": "src",
+  "package_name": "duckietown-serialization-ds1",
+  "entry_points": {
+    "console_scripts": []
+  },
+  "zip_safe": true,
+  "include_package_data": true,
+  "modules": [
+    "duckietown_serialization_ds1"
+  ],
+  "version": "1.0.18",
+  "author": "",
+  "author_email": "",
+  "url": ""
+}
