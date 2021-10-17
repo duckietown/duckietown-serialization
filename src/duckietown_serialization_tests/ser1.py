@@ -25,7 +25,7 @@ def ser1():
     print(d_yaml)
 
     d2_json = json.loads(d_json)
-    d2_yaml = yaml.load(d_yaml)
+    d2_yaml = yaml.load(d_yaml, Loader=yaml.Loader)
 
     ob1 = Serializable.from_json_dict(d2_json)
 
@@ -54,7 +54,7 @@ def ser2():
     print(d_yaml)
 
     d2_json = json.loads(d_json)
-    d2_yaml = yaml.load(d_yaml)
+    d2_yaml = yaml.load(d_yaml, Loader=yaml.Loader)
 
     ob1 = Serializable.from_json_dict(d2_json)
     print(ob1)
@@ -75,7 +75,7 @@ def try_serialization(ob):
     print(d_yaml)
 
     d2_json = json.loads(d_json)
-    d2_yaml = yaml.load(d_yaml)
+    d2_yaml = yaml.load(d_yaml, Loader=yaml.Loader)
 
     ob1 = Serializable.from_json_dict(d2_json)
     print(ob1)

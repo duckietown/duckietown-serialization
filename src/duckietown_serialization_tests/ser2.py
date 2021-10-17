@@ -28,7 +28,7 @@ def test_dump_and_load(ob):
     print(d_yaml)
 
     d2_json = json.loads(d_json)
-    d2_yaml = yaml.load(d_yaml)
+    d2_yaml = yaml.load(d_yaml, Loader=yaml.Loader)
 
     ob2j = Serializable.from_json_dict(d2_json)
     ob2y = Serializable.from_json_dict(d2_yaml)
