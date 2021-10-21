@@ -9,7 +9,7 @@ with backend JSON or YAML.
 
 ## Goals
 
-- both JSON and YAML backend. 
+- both JSON and YAML backend.
 - built with forward-compatibility in mind
 - data can be interpreted/read even without having the class definition
 - good for configuration files editing
@@ -28,7 +28,7 @@ Some examples:
 ```
 
 ```python
-    
+
 class Point(Serializable):
   def __init__(self, x, y):
       self.x = x
@@ -83,7 +83,7 @@ my-object:
         attribute2: 2
 ```
 
-This opens up a good way to have forward compatibility: 
+This opens up a good way to have forward compatibility:
 if an implementation doesn't know `DerivedClass` it can just interpret
 the portion of `BaseClass`.
 
@@ -99,8 +99,8 @@ the portion of `BaseClass`.
   dependencies:
     ~Dependencies:
       ClassName: python_module>=1.3
-      
+
 ~ClassName:
-   
-    
+
+
 ```
