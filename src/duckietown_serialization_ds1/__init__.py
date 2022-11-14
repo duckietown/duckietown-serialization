@@ -1,7 +1,7 @@
 # coding=utf-8
 from __future__ import unicode_literals
 
-__version__ = "1.0.33"
+__version__ = "1.0.34"
 
 import logging
 
